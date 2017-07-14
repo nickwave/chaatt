@@ -1,1 +1,1 @@
-[alt](/images/sequence_diagram.png)
+![](/images/sequence_diagram.png)
