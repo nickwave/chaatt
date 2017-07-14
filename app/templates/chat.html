@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block script %}
+<script type="text/javascript" charset="utf-8">
+$(document).ready(function() {
+    var socket = io.connect('http://' + document.domain + ':' + location.port);
+    var cur_msg_id = -1;
+    
+    socket.on('connect', function() {
+        if (cur_msg_id === -1) {
+            socket.emit('write_message', {title: '{{ title }}', timestamp: moment().format(), control_message: 'join'});
+        }
+    });
+    
+    socket.on('reconnect', function() {
+        socket.emit('read_messages', {title: '{{ title }}', cur_msg_id: cur_msg_id, control_message: 'join'});
+    });
+    
+    socket.on('chat_content_updated', function() {
+        socket.emit('read_messages', {title: '{{ title }}', cur_msg_id: cur_msg_id, control_message: 'none'});
+    });
+    
+    socket.on('update_messages', function(data) {
+        cur_msg_id = data.cur_msg_id;
+        for (var i = 0, messages = '', timestamp, timestamp_div, author, author_div, text_div; i < data.messages.length; i++) {
+            timestamp = moment.parseZone(data.messages[i]['timestamp']).local().format('D MMMM, YYYY HH:mm');
+            timestamp_div = '<div class="message_timestamp">(' + timestamp + ')</div>';
+            author = data.messages[i]['username'];
+            author_div = '<div class="message_author username_' + author + '" >' + author + ':</div>';
+            text_div = '<div class="message_text' + (author=='System'?' gray_text':'') + '">' + data.messages[i]['text'] + '</div>';
+            messages += '<div class="message">\
+                            ' + timestamp_div + '\
+                            <div class="author_and_message">\
+                                ' + author_div + '\
+                                ' + text_div + '\
+                            </div>\
+                         </div>\n';
+        }
+        $('#messages_folder').html($('#messages_folder').html() + messages);
+        $('#spinner').remove();
+        $('#messages_folder').scrollTop($('#messages_folder')[0].scrollHeight);
+        for (var i = 0; i < data.users.length; i++) {
+            $('.username_' + data.users[i]['username']).css({'color': data.users[i]['color']});
+        }
+    });
+    
+    socket.on('users_update', function(data) {
+        if (data.user_exists === true) {
+            for (var i = 0, userlist = ''; i < data.users.length; i++) {
+                userlist += '<div class="username_' + data.users[i]['username'] + '" >' + data.users[i]['username'] + '</div>\n';
+            }
+            $('#userlist').html(userlist);
+            for (var i = 0; i < data.users.length; i++) {
+                $('.username_' + data.users[i]['username']).css({'color': data.users[i]['color']});
+            }
+        } else {
+            if (data.current_user == "{{ current_user.username }}") {
+                if (data.username_validated === true) {
+                    alert('User "' + data.username + '" is not exists');
+                } else {
+                    alert('Username "' + data.username + '" is not valid');
+                }
+            }
+        }
+    });
+    
+    var redirect = function(redirect_url) {
+        socket.emit('write_message', {timestamp: moment().format(), title: '{{ title }}', control_message: 'leave'});
+        socket.disconnect();
+        window.location.href = redirect_url;
+    };
+    
+    socket.on('redirect_via_route', function(data) {
+        if (data.username == '{{ current_user.username }}') redirect(data.redirect_url);
+    });
+    
+    socket.on('redirect_via_event', function(data) {
+        redirect(data.redirect_url);
+    });
+    
+    var check_and_send_message = function() {
+        var send_message_field = $('#send_message_field');
+        if (send_message_field.val() !== '') {
+            socket.emit('write_message', {message: send_message_field.val(),
+                                        timestamp: moment().format(),
+                                            title: '{{ title }}',
+                                  control_message: 'message'});
+            send_message_field.val('');
+        }
+    };
+    
+    $('#send_message_field').keypress(function(e) {
+        var code = e.keyCode || e.which;
+        if (code == 13) {
+            check_and_send_message();
+        }
+    });
+    
+    $('#send_message_button').bind('click', function() {
+        check_and_send_message();
+    });
+    
+    var check_and_invite_user = function() {
+        var invite_username = $('#invite_field');
+        if (/^$|[, ]/.test(invite_username.val())) {
+            alert('Username "' + invite_username.val() + '" is not valid');
+        } else {
+            for (var i=0, userlist = $('#userlist > div'); i < userlist.length; i++) {
+                if (userlist[i].textContent == invite_username.val()) {
+                    alert('"' + invite_username.val() + '" is already here');
+                    invite_username.val('');
+                    return false;
+                }
+            }
+            socket.emit('invite_user', {username: invite_username.val(), title: '{{ title }}'});
+            invite_username.val('');
+            return true;
+        }
+    };
+    
+    $('#invite_field').keypress(function(e) {
+        var code = e.keyCode || e.which;
+        if (code == 13) {
+            check_and_invite_user();
+        }
+    });
+    
+    $('#invite_button').bind('click', function() {
+        check_and_invite_user();
+    });
+    
+    $('#userlist_button').bind('click', function() {
+        var users = $('#users');
+        users.is(':visible') ? users.hide() : users.show();
+    });
+});
+</script>
+{% endblock %}
+{% block content %}
+<div class="vertical-center">
+    <div class="container" id="chat_container">
+        <div class="row">
+            <div id="chat_title">{{ title }}</div>
+            <button class="btn btn-block" id="userlist_button">Users [{{ users|length }}]</button>
+            <div id="users" class="container">
+                <div id="userlist">
+                {% for user in users %}
+                    <div class="username_{{ user.username }}">{{ user.username }}</div>
+                {% endfor %}
+                </div>
+                <div id="invite_form form-group">
+                    <input id="invite_field" class="col-md-9 col-xs-9" placeholder="Username" />
+                    <button type="button" id="invite_button" class="btn col-md-3 col-xs-3">
+                        <span class="glyphicon glyphicon-plus"></span> Invite
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="row" id="message_row">
+            <div id="messages_folder">
+                <div class="vertical-center" id="spinner">
+                    <i class="fa fa-refresh fa-spin" style="font-size: 24px; margin-left: 50%;"></i>
+                </div>
+            </div>
+        </div>
+        <div id="send_message_row" class="row form-group">
+            <input id="send_message_field" class="col-md-9 col-xs-9" placeholder="Enter your message here…">
+            <button type="button" id="send_message_button" class="btn col-md-3 col-xs-3">
+                <span class="glyphicon glyphicon-chevron-right"></span> Send
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+gunicorn
+whitenoise
+gevent
+File_read_backwards
+Flask
+Flask-Login
+Flask-Bcrypt
+Flask-Socketio
+Flask-SQLAlchemy
+Flask-WTF
+WTForms
+Jinja2
+MarkupSafe
+SQLAlchemy
+Werkzeug
+itsdangerous

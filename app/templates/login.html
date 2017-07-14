@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block script %}
+<script type="text/javascript" charset="utf-8">
+$(document).ready(function() {
+    $('input[name=username]').focus();
+    
+    var check_and_send_username = function() {
+        var username = $('input[name="username"]').val();
+        if (/^$|[, ]/.test(username)) {
+            alert('Username "' + username + '" is not valid');
+        } else {
+            $.getJSON("{{ url_for('main.username_check') }}", {username: username}, function(data) {
+                if (data.username_validated === true) {
+                    var text = '';
+                    if (data.username_exists === true) {
+                        text = 'Welcome back, ' + data.username + '!';
+                    } else {
+                        text = 'Username "' + data.username + '" is available<br />You can choose it';
+                    }
+                    $('#general_container').html('<div class="h1">' + text + '</div>' +
+                                                 '<form method=post action="">' +
+                                                 $('#before_form').html() +
+                                                 '<input type=submit value="Next" class="btn col-md-3 col-xs-3"/>' +
+                                                 '</form>');
+                    $('input[name="username"]').val(data.username);
+                    $('#username_field').hide();
+                    $('#password_field').show();
+                    $('input[name=password]').focus();
+                } else {
+                    alert('Username "' + data.username + '" is not valid');
+                }
+            });
+        }
+    };
+    
+    $('#submit_button').bind('click', function() {
+        check_and_send_username();
+    });
+
+    $('input[name="username"]').bind('keydown', function(e) {
+        if (e.keyCode == 13) {
+            check_and_send_username();
+        }
+    });
+});
+</script>
+{% endblock %}
+{% block content %}
+<div class="vertical-center">
+    <div class="container" id="general_container">
+        <div class="h1">Sign in</div>
+        <div id="before_form" class="form-group">
+            {{ form.hidden_tag() }}
+            {{ form.csrf_token }}
+            <div id="username_field" class="col-md-9 col-xs-9">{{ form.username }}</div>
+            <div id="password_field" class="col-md-9 col-xs-9">{{ form.password }}</div>
+        </div>
+        <div class="col-md-3 col-xs-3"><button id="submit_button" class="btn">Next</button></div>
+    </div>
+</div>
+{% endblock %}
