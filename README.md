@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Chaatt
 --------
 
@@ -19,7 +18,7 @@ Chaatt is a Flask powered asynchronous web-chat implemented using Socket.IO java
 * [momentjs] - for parsing, manipulating and displaying dates and times.
 
 ### Preparing and launching
-(Warning ⚠️ Only **HTTP** works fine)
+(Warning :warning: Only **HTTP** works fine)
 
 Extensions installation
 ```sh
@@ -40,6 +39,3 @@ $ python ./run.py
 [jquery]: <https://jquery.com>
 [socketio]: <https://socket.io>
 [momentjs]: <https://momentjs.com>
-=======
-![](/images/sequence_diagram.png)
->>>>>>> origin/master
