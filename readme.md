@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Chaatt
 --------
 
@@ -39,3 +40,6 @@ $ python ./run.py
 [jquery]: <https://jquery.com>
 [socketio]: <https://socket.io>
 [momentjs]: <https://momentjs.com>
+=======
+![](/images/sequence_diagram.png)
+>>>>>>> origin/master
