@@ -1,5 +1,4 @@
 # Chaatt
---------
 
 Chaatt is a Flask powered asynchronous web-chat implemented using Socket.IO javascript library.
 ### Flask extensions
@@ -20,11 +19,11 @@ Chaatt is a Flask powered asynchronous web-chat implemented using Socket.IO java
 ### Preparing and launching
 (Warning :warning: Only **HTTP** works fine)
 
-Extensions installation
+#### Extensions installation
 ```sh
 $ pip install -r requirements.txt
 ```
-Launching
+#### Launching
 ```sh
 $ python ./run.py
 ```
