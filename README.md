@@ -29,7 +29,8 @@ $ python ./run.py
 ```
 
 [//]: # (link zone)
-[Chaatt]: < http://chaatt.herokuapp.com>
+
+[Chaatt]: <http://chaatt.herokuapp.com>
 [Flask]: <http://flask.pocoo.org>
 [Flask-Login]: <https://flask-login.readthedocs.io/en/latest>
 [Flask-Bcrypt]: <https://flask-bcrypt.readthedocs.io>
