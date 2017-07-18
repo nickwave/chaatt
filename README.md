@@ -11,10 +11,10 @@
 
 ### Javascript, CSS libraries:
 
-* [bootstrap] - popular framework for developing responsive, mobile first projects on the web.
-* [jquery] - library, that makes things like HTML document traversal and manipulation, event handling, animation.
-* [socketio] - gives access to low latency bi-directional communications between the clients and the server.
-* [momentjs] - for parsing, manipulating and displaying dates and times.
+* [Bootstrap] - popular framework for developing responsive, mobile first projects on the web.
+* [jQuery] - library, that makes things like HTML document traversal and manipulation, event handling, animation.
+* [Socket.IO] - gives access to low latency bi-directional communications between the clients and the server.
+* [Moment.js] - for parsing, manipulating and displaying dates and times.
 
 ### Preparing and launching
 (Warning :warning: Only **HTTP** works fine)
@@ -37,7 +37,7 @@ $ python ./run.py
 [Flask-SQLAlchemy]: <flask-sqlalchemy.pocoo.org>
 [Flask-WTF]: <https://flask-wtf.readthedocs.io>
 [Flask-SocketIO]: <https://flask-socketio.readthedocs.io>
-[bootstrap]: <getbootstrap.com>
-[jquery]: <https://jquery.com>
-[socketio]: <https://socket.io>
-[momentjs]: <https://momentjs.com>
+[Bootstrap]: <getbootstrap.com>
+[jQuery]: <https://jquery.com>
+[Socket.IO]: <https://socket.io>
+[Moment.js]: <https://momentjs.com>
