@@ -10,6 +10,22 @@ from re import search
 def get_user(ident):
     return User.query.get(int(ident))
 
+    
+def get_user_by(username=None, color=None):
+    if username is not None:
+        return User.query.filter_by(username=username).first()
+    if color is not None:
+        return User.query.filter_by(color=color).first()
+
+
+def register_user(username, password):
+    user = User(username = username,
+                password = bcrypt.generate_password_hash(password).decode('utf-8'))
+    user.color = user.generate_unique_color()
+    db.session.add(user)
+    db.session.commit()
+    return user
+
 
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
@@ -19,37 +35,37 @@ class User(db.Model, UserMixin):
     color         = db.Column(db.String(16), unique = True)
     
     
-    def generate_unique_color():
+    def generate_unique_color(self):
         color = 'rgb({},{},{})'.format(*(randint(0, 256) for i in range(3)))
-        return color if User.get_user_by(color=color) is None else generate_unique_color()
+        return color if get_user_by(color=color) is None else self.generate_unique_color()
     
-    
-    def get_user_by(username=None, color=None):
-        if username is not None:
-            return User.query.filter_by(username=username).first()
-        if color is not None:
-            return User.query.filter_by(color=color).first()
-
     
     def is_authenticated(self, password):
         if bcrypt.check_password_hash(self.password, password):
-            self.color = User.generate_unique_color()
+            self.color = self.generate_unique_color()
             db.session.commit()
             return True
         else:
             return False
-            
+    
+    
     def is_added_to_chat(self, title):
-        return any(True for user in Chat.get_chat_by(title=title).users_in_chat if user.username == self.username)
-    
-    
-    def register_user(username, password):
-        user = User(username = username,
-                    password = bcrypt.generate_password_hash(password).decode('utf-8'),
-                    color    = User.generate_unique_color())
-        db.session.add(user)
-        db.session.commit()
-        return user
+        return any(True for user in get_chat_by(title=title).users_in_chat if user.username == self.username)
+
+
+
+def get_chat_by(title=None, user=None):
+    if title is not None:
+        return Chat.query.filter_by(title=title).first()
+    if user is not None:
+        return (chat for chat in Chat.query.all() if user.username in (user.username for user in chat.users_in_chat))
+
+
+def create_chat(title, current_user):
+    chat = Chat(title=title)
+    chat.users_in_chat.append(current_user)
+    db.session.add(chat)
+    db.session.commit()
 
 
 class Chat(db.Model):
@@ -61,39 +77,23 @@ class Chat(db.Model):
                                                           db.Column('user_id', db.Integer, db.ForeignKey('users.id'))))
     
     
-    def get_chat_by(title=None, user=None):
-        if title is not None:
-            return Chat.query.filter_by(title=title).first()
-        if user is not None:
-            return (chat for chat in Chat.query.all() if user.username in (user.username for user in chat.users_in_chat))
-
-    
     def contains_user(self, user):
         return True if user in self.users_in_chat else False
     
     
-    def create_chat(title, current_user):
-        chat = Chat(title=title)
-        chat.users_in_chat.append(current_user)
-        db.session.add(chat)
+    def remove_user(self, current_user):
+        self.users_in_chat.remove(current_user)
+        if not self.users_in_chat:
+            db.session.delete(self)
+            remove(basedir_join('chat-logs/{}.log'.format(self.title))['path'])
         db.session.commit()
     
     
-    def remove_user_from_chat(title, current_user):
-        chat = Chat.get_chat_by(title=title)
-        chat.users_in_chat.remove(current_user)
-        if not chat.users_in_chat:
-            db.session.delete(chat)
-            remove(basedir_join('chat-logs/{}.log'.format(title))['path'])
-        db.session.commit()
-
-
-    def invite_user_in_chat(title, username):
+    def invite_user(self, username):
         username_validated = True if search(r'^$|[, ]', username) is None else False
-        invited_user = User.get_user_by(username=username)
+        invited_user = get_user_by(username=username)
         if invited_user is not None:
-            chat = Chat.get_chat_by(title=title)
-            chat.users_in_chat.append(invited_user)
+            self.users_in_chat.append(invited_user)
             db.session.commit()
             return username_validated, True
         else:

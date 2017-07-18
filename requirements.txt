@@ -1,4 +1,3 @@
-gunicorn
 whitenoise
 gevent
 File_read_backwards

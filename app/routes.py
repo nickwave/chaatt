@@ -2,7 +2,7 @@ from flask import render_template, jsonify, flash, redirect, url_for, request
 from flask_login import login_user, logout_user, current_user, login_required
 from app import app, main, socketio
 from app.forms import LoginForm, CreateChatForm
-from app.models import User, Chat
+from app.models import get_user_by, register_user, get_chat_by, create_chat
 from re import search
 
 
@@ -21,7 +21,7 @@ def index():
 @main.route('/logout')
 @login_required
 def logout():
-    for chat in Chat.get_chat_by(user=current_user):
+    for chat in get_chat_by(user=current_user):
         socketio.emit('redirect_via_route', {'redirect_url': url_for('main.login'),
                                              'username'    : current_user.username}, room=chat.title)
     logout_user()
@@ -38,9 +38,9 @@ def login():
         username = request.form['username']
         password = request.form['password']
         if not True in (search(r'^$|[, ]', field) for field in (username, password)):
-            user = User.get_user_by(username=username)
+            user = get_user_by(username=username)
             if user is None:
-                login_user(User.register_user(username, password))
+                login_user(register_user(username, password))
                 return redirect(url_for('main.menu'))
             elif user.is_authenticated(password):
                 login_user(user)
@@ -56,13 +56,13 @@ def username_check():
     username = request.args.get('username', type=str)
     return jsonify(username           = username,
                    username_validated = False if search(r'^$|[, ]', username) else True,
-                   username_exists    = False if User.get_user_by(username=username) is None else True)
+                   username_exists    = False if get_user_by(username=username) is None else True)
 
 
 @main.route('/get_chatlist')
 @login_required
 def get_chatlist():
-    return jsonify(chatlist=[chat.title for chat in Chat.get_chat_by(user=current_user)])
+    return jsonify(chatlist=[chat.title for chat in get_chat_by(user=current_user)])
 
 
 @main.route('/menu')
@@ -79,16 +79,16 @@ def chat_creation():
     title = request.form['title']
     if search(r'^$|[, ]', title):
         return redirect(url_for('main.menu')), flash('Chat title contains unallowable characters')
-    elif Chat.get_chat_by(title=title) is not None:
+    elif get_chat_by(title=title) is not None:
         return redirect(url_for('main.menu')), flash('This chat already exists')
     else:
-        return redirect(url_for('main.chat', title=title)), Chat.create_chat(title, current_user)
+        return redirect(url_for('main.chat', title=title)), create_chat(title, current_user)
 
 
 @main.route('/chat/<string:title>')
 @login_required
 def chat(title):
-    chat = Chat.get_chat_by(title=title)
+    chat = get_chat_by(title=title)
     if chat is None or not chat.contains_user(current_user):
         return redirect(url_for('main.menu'))
     else:
@@ -100,7 +100,7 @@ def chat(title):
 @main.route('/decline_chat/<string:title>')
 @login_required
 def decline_chat(title):
-    Chat.remove_user_from_chat(title, current_user)
+    get_chat_by(title=title).remove_user(current_user)
     return redirect(url_for('main.menu'))
 
 

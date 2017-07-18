@@ -4,6 +4,7 @@ from flask_login import LoginManager
 from flask_bcrypt import Bcrypt
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
+from flask_wtf.csrf import CSRFProtect
 from config import basedir_join
 
 
@@ -13,6 +14,7 @@ lm       = LoginManager(app)
 bcrypt   = Bcrypt(app)
 socketio = SocketIO(async_mode='gevent')
 db       = SQLAlchemy(app)
+csrf     = CSRFProtect(app)
 
 
 def create_app(debug=False):

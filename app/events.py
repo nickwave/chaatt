@@ -2,7 +2,7 @@ from flask import request, url_for
 from flask_login import current_user
 from flask_socketio import join_room, leave_room
 from app import socketio
-from app.models import Chat
+from app.models import get_chat_by
 from config import basedir_join
 from file_read_backwards import FileReadBackwards
 from functools import wraps
@@ -61,7 +61,6 @@ def control_message_processor(initial_function):
 @control_message_processor
 @auth_required
 def write_message(message):
-    #
     if message['control_message'] == 'join':
         author, text = 'System', '{} has joined the chat'.format(current_user.username)
     
@@ -80,7 +79,7 @@ def write_message(message):
 @auth_required
 def read_messages(message):
     messages, cur_msg_id = read_from_file(message['cur_msg_id'], message['title'])
-    users = [{'username': user.username, 'color': user.color} for user in Chat.get_chat_by(title=message['title']).users_in_chat]
+    users = [{'username': user.username, 'color': user.color} for user in get_chat_by(title=message['title']).users_in_chat]
     socketio.emit('update_messages', {'messages'  : messages,
                                       'cur_msg_id': cur_msg_id,
                                       'users'     : users}, room=request.sid)
@@ -89,8 +88,8 @@ def read_messages(message):
 @socketio.on('invite_user')
 @auth_required
 def invite_user(message):
-    username_validated, user_exists = Chat.invite_user_in_chat(message['title'], message['username'])
-    users = [{'username': user.username, 'color': user.color} for user in Chat.get_chat_by(title=message['title']).users_in_chat]
+    username_validated, user_exists = get_chat_by(title=message['title']).invite_user(message['username'])
+    users = [{'username': user.username, 'color': user.color} for user in get_chat_by(title=message['title']).users_in_chat]
     socketio.emit('users_update', {'username'          : message['username'],
                                    'current_user'      : current_user.username,
                                    'username_validated': username_validated,
