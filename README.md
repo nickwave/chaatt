@@ -1,6 +1,6 @@
 # Chaatt
 
-Chaatt is a Flask powered asynchronous web-chat implemented using Socket.IO javascript library.
+[Chaatt] is a [Flask] powered asynchronous web-chat implemented using Socket.IO javascript library.
 ### Flask extensions
 
 * [Flask-Login] - provides user session management.
@@ -29,6 +29,8 @@ $ python ./run.py
 ```
 
 [//]: # (link zone)
+[Chaatt]: < http://chaatt.herokuapp.com>
+[Flask]: <http://flask.pocoo.org>
 [Flask-Login]: <https://flask-login.readthedocs.io/en/latest>
 [Flask-Bcrypt]: <https://flask-bcrypt.readthedocs.io>
 [Flask-SQLAlchemy]: <flask-sqlalchemy.pocoo.org>
