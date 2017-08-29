@@ -17,8 +17,6 @@
 * [Moment.js] - for parsing, manipulating and displaying dates and times.
 
 ### Preparing and launching
-(Warning :warning: Only **HTTP** works fine)
-
 #### Extensions installation
 ```sh
 $ pip install -r requirements.txt
