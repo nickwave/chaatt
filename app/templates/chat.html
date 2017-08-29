@@ -2,7 +2,7 @@
 {% block script %}
 <script type="text/javascript" charset="utf-8">
 $(document).ready(function() {
-    var socket = io.connect('http://' + document.domain + ':' + location.port);
+    var socket = io.connect('https://' + document.domain + ':' + location.port);
     var cur_msg_id = -1;
     
     socket.on('connect', function() {
@@ -22,18 +22,18 @@ $(document).ready(function() {
     socket.on('update_messages', function(data) {
         cur_msg_id = data.cur_msg_id;
         for (var i = 0, messages = '', timestamp, timestamp_div, author, author_div, text_div; i < data.messages.length; i++) {
-            timestamp = moment.parseZone(data.messages[i]['timestamp']).local().format('D MMMM, YYYY HH:mm');
+            timestamp     = moment.parseZone(data.messages[i]['timestamp']).local().format('D MMMM, YYYY HH:mm');
             timestamp_div = '<div class="message_timestamp">(' + timestamp + ')</div>';
-            author = data.messages[i]['username'];
-            author_div = '<div class="message_author username_' + author + '" >' + author + ':</div>';
-            text_div = '<div class="message_text' + (author=='System'?' gray_text':'') + '">' + data.messages[i]['text'] + '</div>';
-            messages += '<div class="message">\
-                            ' + timestamp_div + '\
-                            <div class="author_and_message">\
-                                ' + author_div + '\
-                                ' + text_div + '\
-                            </div>\
-                         </div>\n';
+            author        = data.messages[i]['username'];
+            author_div    = '<div class="message_author username_' + author + '" >' + author + ':</div>';
+            text_div      = '<div class="message_text' + (author=='System'?' gray_text':'') + '">' + data.messages[i]['text'] + '</div>';
+            messages     += '<div class="message">\
+                                ' + timestamp_div + '\
+                                <div class="author_and_message">\
+                                    ' + author_div + '\
+                                    ' + text_div + '\
+                                </div>\
+                             </div>\n';
         }
         $('#messages_folder').html($('#messages_folder').html() + messages);
         $('#spinner').remove();

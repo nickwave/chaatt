@@ -8,9 +8,12 @@ class AbstractForm(FlaskForm):
 
 
 class LoginForm(AbstractForm):
-    username = StringField(render_kw={"placeholder": "Enter your username"}, validators = [InputRequired()])
-    password = PasswordField(render_kw={"placeholder": "Enter your password"}, validators = [InputRequired()])
+    username =   StringField(render_kw  = {"placeholder": "Enter your username"},
+                             validators = [InputRequired()])
+    password = PasswordField(render_kw  = {"placeholder": "Enter your password"},
+                             validators = [InputRequired()])
 
 
 class CreateChatForm(AbstractForm):
-    title = StringField(render_kw={"placeholder": "Enter chat title"}, validators = [InputRequired()])
+    title = StringField(render_kw  = {"placeholder": "Enter chat title"},
+                        validators = [InputRequired()])

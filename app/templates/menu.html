@@ -6,7 +6,7 @@ $(document).ready(function() {
         $('#update_button').html('Update chatlist [<i class="fa fa-refresh fa-spin"></i>]');
         $.getJSON("{{ url_for('main.get_chatlist') }}", function(data) {
             for (var i = 0, chatlist = '', title; i < data.chatlist.length; i++) {
-                title = data.chatlist[i];
+                title     = data.chatlist[i];
                 chatlist += '<div class="chat_link_row form-group">\
                                  <a class="chat_link btn col-md-9 col-xs-9" href="/chat/' + title + '">Join the "' + title + '" chat</a>\
                                  <a class="decline_link btn col-md-3 col-xs-3" href="/decline_chat/' + title + '">Remove</a>\
